@@ -13,7 +13,7 @@ func TestAesCBCEncrypt(t *testing.T) {
 
 	t.Logf("plaintext: %s, key: %s, iv: %s \n", string(plaintext), string(key), string(iv))
 
-	ciphertext, err := AesCBCEncrypt(plaintext, key, iv)
+	ciphertext, err := CBCEncrypt(plaintext, key, iv)
 	if err != nil {
 		t.Error(err)
 		return
@@ -33,7 +33,7 @@ func TestAesCBCDecrypt(t *testing.T) {
 	t.Logf("ciphertext: %s, key: %s, iv: %s \n", string(ciphertext), string(key), string(iv))
 
 	base64DecodeData, _ := base64.StdEncoding.DecodeString(string(ciphertext))
-	plaintext, err := AesCBCDecrypt(base64DecodeData, key, iv)
+	plaintext, err := CBCDecrypt(base64DecodeData, key, iv)
 	if err != nil {
 		t.Error(err)
 		return

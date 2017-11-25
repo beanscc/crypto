@@ -3,31 +3,27 @@ package aes
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/padding"
 	"errors"
+
+	"github.com/beanscc/crypto/padding"
 )
 
-// aes cbc模式加密
-/**
-@plaintext 需加密的明文
-@key	   加密key 16(aes-128), 24(aes-192), 32(aes-256)
-@iv        密钥偏移量16字节长度
-
-CBC mode works on blocks so plaintexts may need to be padded to the
-next whole block.
-*/
-func AesCBCEncrypt(plaintext, key, iv []byte) ([]byte, error) {
-	// 若加密明文的字节长度不是16的整数倍, 需将明文字符串填充补齐至16的整数倍字节长度
+// CBCEncrypt aes cbc模式加密
+// plaintext 需加密的明文
+// key	     加密key， 长度说明：16(aes-128), 24(aes-192), 32(aes-256)
+// iv        密钥偏移量16字节长度
+func CBCEncrypt(plaintext, key, iv []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
 
+	// iv 密钥偏移量长度不足16
 	if iv == nil || len(iv) < 16 {
-		// iv 密钥偏移量16字节长度不足
 		return nil, errors.New("IV length must equal block size")
 	}
 
+	// 若加密明文的字节长度不是16的整数倍, 需将明文字符串填充补齐至16的整数倍字节长度
 	plaintext = padding.PKCS5Padding(plaintext, aes.BlockSize)
 	ciphertext := make([]byte, len(plaintext))
 	mode := cipher.NewCBCEncrypter(block, iv)
@@ -40,9 +36,8 @@ func AesCBCEncrypt(plaintext, key, iv []byte) ([]byte, error) {
 	return ciphertext, nil
 }
 
-// aes cbc 解密
-func AesCBCDecrypt(ciphertext, key, iv []byte) ([]byte, error) {
-	// aes加密数据区块分组长度必须是128byte，16个字节的长度
+// CBCDecrypt aes cbc 解密
+func CBCDecrypt(ciphertext, key, iv []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -66,7 +61,7 @@ func AesCBCDecrypt(ciphertext, key, iv []byte) ([]byte, error) {
 	// CryptBlocks can work in-place if the two arguments are the same.
 	mode.CryptBlocks(plaintext, ciphertext)
 
-	// 需解 填充
+	// 需去除填充
 	plaintext, err = padding.PKCS5Unpadding(plaintext)
 	if err != nil {
 		// unpadding err (可能是解密的字符串和key长度不匹配(或解密key值不对)导致无法正常unpadding)
